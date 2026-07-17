@@ -1,0 +1,60 @@
+# ─────────────────────────────────────────────────────────────
+#  polymarket copy-bot — configured for top ROI target
+#  Run `python scanner.py` to refresh target recommendations
+# ─────────────────────────────────────────────────────────────
+
+# TOURNAMENT WINNER (23 strategies tested, walk-forward validated):
+#   Hauchn <15¢ entry, maker orders, 20% copy → +168% ROI, $9,375 P&L
+#   4/4 weekly windows profitable. Min week: +52.9%. Avg week: +125.5%
+#   Strategy: market-cap ranking arb — NVIDIA/Apple/Alphabet vs benchmarks
+#   donthackme (+391%) disqualified: all trades in last 7 days, no history
+target_wallet: "0xf0ca28d5b0141f0a8e7b251dea80fd881cb166ed"
+
+# Start in dry_run. Check logs/tracecopy.log to confirm fills are
+# detected before switching to real.
+mode: dry_run                     # dry_run | real
+
+sizing:
+  # percent_of_target scales with target's position size.
+  # 20% copy — validated best scale. At 5%: $1,488 in, $2,437 P&L (+168%)
+  # At 20%: $5,952 in, $9,375 P&L. Same ROI, 4x the money.
+  mode: percent_of_target
+  percent_of_target: 0.20
+
+  # Fixed fallback (used when mode=fixed)
+  fixed_usd_per_fill: 10.0
+
+  # Backtested capital: ~$6,000 at 20% copy over 30 days.
+  max_usd_total_in_positions: 6000.0
+
+  # Wait for 10 accumulated shares before mirroring — avoids copying noise fills.
+  min_target_shares_to_copy: 10
+
+  order_type: maker               # maker = resting limit order, lower slippage
+
+maker_settings:
+  rest_timeout_s: 30
+  price_offset_ticks: 0
+
+position_expiry:
+  buffer_s: 60
+  fallback_ttl_min: 1440
+
+  # Maker orders on Hauchn's illiquid markets — tight slippage.
+  entry_bps_max: 50
+
+dedup:
+  seen_cap: 50000
+
+watchdog:
+  max_consecutive_errors: 5
+  silent_timeout_s: 30
+
+# Uncomment and fill in for real trading.
+# Get api_key/api_secret/passphrase from polymarket.com → Settings → API keys
+#polymarket:
+#  private_key: "0x..."          # your Polygon wallet private key
+#  wallet_address: "0x..."       # your Polygon wallet address
+#  api_key: "..."
+#  api_secret: "..."
+#  passphrase: "..."
